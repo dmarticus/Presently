@@ -59,7 +59,7 @@
     <string name="no_app_found">Aucune application trouvée pour ouvrir ce fichier</string>
     <string name="permission_export">Une autorisation est nécessaire pour exporter des données</string>
     <string name="copied">Copié dans le presse-papier</string>
-    <string name="security">déverrouille</string>
+    <string name="security">Déverrouillage</string>
     <string name="lock_title">Déverrouiller Presently</string>
     <string name="lock_summary">Presently est verrouillée, déverrouillez pour continuer</string>
     <string name="lock_setting_summary_on">Presently se verrouillera avec le scanner biométrique de votre appareil.</string>
@@ -80,4 +80,7 @@
     <string name="one_time_export">Exporter des entrées vers CSV</string>
     <string name="import_summary">Sélectionnez un fichier CSV sauvegardé à importer</string>
     <string name="backup_and_restore">Sauvegarde et restauration</string>
+    <string name="day_of_week_off">La date n\'inclut pas le jour de la semaine</string>
+    <string name="day_of_week_on">La date inclut le jour de la semaine</string>
+    <string name="day_of_week_title">Style de date</string>
 </resources>

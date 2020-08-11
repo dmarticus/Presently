@@ -1,6 +1,5 @@
 package journal.gratitude.com.gratitudejournal.ui.timeline
 
-import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -19,9 +18,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import com.crashlytics.android.Crashlytics
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.android.support.DaggerFragment
 import journal.gratitude.com.gratitudejournal.R
 import journal.gratitude.com.gratitudejournal.databinding.TimelineFragmentBinding
@@ -31,14 +31,12 @@ import journal.gratitude.com.gratitudejournal.ui.calendar.EntryCalendarListener
 import journal.gratitude.com.gratitudejournal.ui.entry.EntryFragment.Companion.DATE
 import journal.gratitude.com.gratitudejournal.ui.entry.EntryFragment.Companion.IS_NEW_ENTRY
 import journal.gratitude.com.gratitudejournal.ui.entry.EntryFragment.Companion.NUM_ENTRIES
-import journal.gratitude.com.gratitudejournal.util.backups.CSVReaderImpl
+import journal.gratitude.com.gratitudejournal.ui.settings.SettingsFragment.Companion.DAY_OF_WEEK
 import journal.gratitude.com.gratitudejournal.util.backups.ExportCallback
-import journal.gratitude.com.gratitudejournal.util.backups.parseCsv
 import journal.gratitude.com.gratitudejournal.util.toLocalDate
 import kotlinx.android.synthetic.main.timeline_fragment.*
 import org.threeten.bp.LocalDate
 import java.io.File
-import java.io.InputStream
 import java.util.*
 import javax.inject.Inject
 
@@ -97,7 +95,9 @@ class TimelineFragment : DaggerFragment() {
 
         timeline_recycler_view.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(context)
-        adapter = TimelineAdapter(activity!!, object : TimelineAdapter.OnClickListener {
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val showDayOfWeek = sharedPrefs?.getBoolean(DAY_OF_WEEK, false) ?: false
+        adapter = TimelineAdapter(activity!!, showDayOfWeek, object : TimelineAdapter.OnClickListener {
             override fun onClick(
                 clickedDate: LocalDate,
                 isNewEntry: Boolean,
@@ -206,7 +206,8 @@ class TimelineFragment : DaggerFragment() {
         try {
             startActivity(intent)
         } catch (activityNotFoundException: ActivityNotFoundException) {
-            Crashlytics.logException(activityNotFoundException)
+            val crashlytics = FirebaseCrashlytics.getInstance()
+            crashlytics.recordException(activityNotFoundException)
             Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT).show()
         }
     }
@@ -236,14 +237,16 @@ class TimelineFragment : DaggerFragment() {
                         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
-                        Crashlytics.logException(e)
+                        val crashlytics = FirebaseCrashlytics.getInstance()
+                        crashlytics.recordException(e)
                         Toast.makeText(context, R.string.no_app_found, Toast.LENGTH_SHORT).show()
                     }
                 }.show()
         }
 
         override fun onFailure(exception: Exception) {
-            Crashlytics.logException(exception)
+            val crashlytics = FirebaseCrashlytics.getInstance()
+            crashlytics.recordException(exception)
             Toast.makeText(context, "Error : ${exception.message}", Toast.LENGTH_SHORT).show()
         }
     }
